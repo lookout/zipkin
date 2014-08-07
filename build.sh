@@ -54,13 +54,18 @@ SHORT_SHA=$(git rev-parse --short HEAD)
 
 NEW_VERSION=$(echo $OLD_VERSION|sed "s/-SNAPSHOT/\+$BUILD_NUMBER\.$SHORT_SHA/")
 VERSION_FILE=$WORKSPACE/project/Project.scala
-cp $VERSION_FILE ${VERSION_FILE}.sav
+VERSION_FILE_BACKUP=$(mktemp) 
+cp $VERSION_FILE $VERSION_FILE_BACKUP
 sed  -i "s/.*val.*zipkinVersion.*$OLD_VERSION\"/  val zipkinVersion = \"$NEW_VERSION\"/" $VERSION_FILE
+
+# Restore the edited project file if script is interrupted
+trap "echo 'Interrupted.Restoring version file'; mv $VERSION_FILE_BACKUP $VERSION_FILE;exit 1" SIGINT SIGQUIT
 
 unset SBT_OPTS
 for SUBDIR in $SUBDIRS ; do 
     $WORKSPACE/bin/sbt $SUBDIR/package-dist
+    mv ${SUBDIR}/dist/${SUBDIR}.zip ${SUBDIR}/dist/${SUBDIR}-${NEW_VERSION}.zip 
 done
 
 # Restore the edited project file
-mv ${VERSION_FILE}.sav $VERSION_FILE
+mv $VERSION_FILE_BACKUP $VERSION_FILE
