@@ -22,7 +22,7 @@ function version () {
         exit 1
     fi
     SUBDIR=$1
-    VERSION=$($WORKSPACE/bin/sbt zipkin-collector-service/release:version|tail -1|\
+    VERSION=$($WORKSPACE/bin/sbt $SUBDIR/release:version|tail -1|\
       awk '{print $2}')
     echo "$VERSION"
 }
@@ -62,9 +62,10 @@ sed  -i "s/.*val.*zipkinVersion.*$OLD_VERSION\"/  val zipkinVersion = \"$NEW_VER
 trap "echo 'Interrupted.Restoring version file'; mv $VERSION_FILE_BACKUP $VERSION_FILE;exit 1" SIGINT SIGQUIT
 
 unset SBT_OPTS
-for SUBDIR in $SUBDIRS ; do 
+for SUBDIR in $SUBDIRS ; do
+    rm -rf $SUBDIR/dist/* 
     $WORKSPACE/bin/sbt $SUBDIR/package-dist
-    mv ${SUBDIR}/dist/${SUBDIR}.zip ${SUBDIR}/dist/${SUBDIR}-${NEW_VERSION}.zip 
+    mv $WORKSPACE/${SUBDIR}/dist/${SUBDIR}.zip $WORKSPACE/${SUBDIR}/dist/${SUBDIR}-${NEW_VERSION}.zip 
 done
 
 # Restore the edited project file
