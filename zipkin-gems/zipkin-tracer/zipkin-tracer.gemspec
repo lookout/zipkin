@@ -18,11 +18,11 @@ $:.unshift lib unless $:.include?(lib)
 require 'zipkin-tracer/version'
 
 Gem::Specification.new do |s|
-  s.name                      = "zipkin-tracer"
+  s.name                      = "lookout-zipkin-tracer"
   s.version                   = ZipkinTracer::VERSION
-  s.authors                   = ["Franklin Hu"]
-  s.email                     = ["franklin@twitter.com"]
-  s.homepage                  = "https://github.com/twitter/zipkin"
+  s.authors                   = ["Ariel Salomon, Franklin Hu"]
+  s.email                     = ["ariel@lookout.com, franklin@twitter.com"]
+  s.homepage                  = "https://github.com/lookout/zipkin"
   s.summary                   = "Ruby tracing via Zipkin"
   s.description               = "Adds tracing instrumentation for ruby applications"
 
