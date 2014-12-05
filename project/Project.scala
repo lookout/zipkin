@@ -381,7 +381,7 @@ object Zipkin extends Build {
     ).settings(
       libraryDependencies ++= Seq(
         twitterServer,
-        "com.twitter" % "kafka_2.9.2" % "0.7.0",
+        "org.apache.kafka" % "kafka_2.9.2" % "0.8.1.1",
         scroogeDep("serializer")
       ) ++ testDependencies ++ scalaTestDeps
     ).dependsOn(common, collector, zookeeper, cassandra, scrooge)
@@ -393,7 +393,7 @@ object Zipkin extends Build {
       settings = defaultSettings
     ).settings(
       libraryDependencies ++= Seq(
-        "com.twitter"      % "kafka_2.9.2"    % "0.7.0",
+        "org.apache.kafka" % "kafka_2.9.2" % "0.8.1.1",
         scroogeDep("serializer")
       ) ++ testDependencies,
       resolvers ++= (proxyRepo match {
@@ -505,9 +505,9 @@ object Zipkin extends Build {
       util("logging"),
       scroogeDep("serializer")
     ) ++ testDependencies,
-    
+
     resolvers ~= {rs => Seq(DefaultMavenRepository) ++ rs},
-    
+
     /* Add configs to resource path for ConfigSpec */
     unmanagedResourceDirectories in Test <<= baseDirectory {
       base =>
