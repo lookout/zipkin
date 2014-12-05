@@ -7,7 +7,7 @@ import com.twitter.util.{Await, Future}
 import java.io._
 
 case class KafkaStreamProcessor(
-  stream: KafkaStream[Option[List[ThriftSpan]]],
+  stream: KafkaStream[Option[List[ThriftSpan]],Option[List[ThriftSpan]]],
   process: Seq[ThriftSpan] => Future[Unit]
   ) extends Runnable {
 

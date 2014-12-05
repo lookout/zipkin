@@ -9,6 +9,11 @@ import java.util.concurrent.{TimeUnit, Executors}
 import java.util.Properties
 import java.net.{SocketAddress, InetSocketAddress}
 
+import com.twitter.scrooge.BinaryThriftStructSerializer
+import com.twitter.zipkin.conversions.thrift.{thriftSpanToSpan, spanToThriftSpan}
+import java.io._
+import kafka.message.Message
+
 object KafkaProcessor {
 
   type KafkaDecoder = Decoder[Option[List[ThriftSpan]]]
@@ -17,7 +22,7 @@ object KafkaProcessor {
     topics:Map[String, Int],
     config: Properties,
     process: Seq[ThriftSpan] => Future[Unit],
-    decoder: KafkaDecoder
+    decoder: KafkaProcessor.KafkaDecoder
   ): KafkaProcessor = new KafkaProcessor(topics, config, process, decoder)
 }
 
@@ -32,7 +37,7 @@ class KafkaProcessor(
     val threadCount = topics.foldLeft(0) { case (sum, (_, a)) => sum + a }
     val pool = Executors.newFixedThreadPool(threadCount)
     for {
-      (topic, streams) <- consumerConnector.createMessageStreams(topics, decoder)
+      (topic, streams) <- consumerConnector.createMessageStreams(topics, decoder, decoder)
       stream <- streams
     } pool.submit(new KafkaStreamProcessor(stream, process))
     pool
@@ -45,3 +50,20 @@ class KafkaProcessor(
     }
   }
 }
+
+class SpanDecoder extends KafkaProcessor.KafkaDecoder {
+  val deserializer = new BinaryThriftStructSerializer[ThriftSpan] {
+    def codec = ThriftSpan
+  }
+
+  def toEvent(message: Message): Option[List[ThriftSpan]] = {
+
+    val buffer = message.payload
+    val payload = new Array[Byte](buffer.remaining)
+    buffer.get(payload)
+    val span = deserializer.fromBytes(payload)
+    Some(List(span))
+  }
+  def fromBytes(bytes: Array[Byte]): Option[List[ThriftSpan]] = Some(List(deserializer.fromBytes(bytes)))
+}
+
