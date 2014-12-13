@@ -14,7 +14,7 @@ import org.scalatest.junit.JUnitRunner
 
 import kafka.consumer.{Consumer, ConsumerConnector, ConsumerConfig}
 import kafka.message.Message
-import kafka.producer.{Producer, ProducerConfig, ProducerData}
+import kafka.producer._
 import kafka.serializer.Decoder
 import kafka.server.KafkaServer
 
@@ -39,6 +39,8 @@ class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
         Some(List(span))
       }
 
+      def fromBytes(bytes: Array[Byte]): Option[List[ThriftSpan]] = Some(List(deserializer.fromBytes(bytes)))
+
       def encode(span: Span) = {
         val gspan = spanToThriftSpan(span)
         deserializer.toBytes(gspan.toThrift)
@@ -48,7 +50,7 @@ class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
   var zkServer: EmbeddedZookeeper = _
   var kafkaServer: KafkaServer = _
 
-  def processorFun(spans: Seq[ThriftSpan]): Future[Unit] = {
+  def processorFun(spans: List[ThriftSpan]): Future[Unit] = {
     assert( 1 == spans.length, "received more spans than sent" )
     val message = spans.head.toSpan
     assert(message.traceId == 1234, "traceId mismatch")
@@ -61,11 +63,11 @@ class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
     Future.Done
   }
 
-  def createMessage(): Message = {
+  def createMessage(): Array[Byte] = {
     val annotation = Annotation(1, "value", Some(Endpoint(1, 2, "service")))
     val message = Span(1234, "methodName", 4567, None, List(annotation), Nil)
     val codec = new TestDecoder()
-    new Message(codec.encode(message))
+    codec.encode(message)
   }
 
   before {
@@ -80,24 +82,28 @@ class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
   }
 
   test("kafka processor test simple") {
-
     val producerConfig = TestUtils.kafkaProducerProps
     val processorConfig = TestUtils.kafkaProcessorProps
-    val producer = new Producer[String, Message](new ProducerConfig(producerConfig))
+    val producer = new Producer[Array[Byte], Array[Byte]](new ProducerConfig(producerConfig))
     val message = createMessage()
-    val data = new ProducerData[String, Message]("integration-test-topic", "key", Seq(message) )
+    val data = new KeyedMessage("integration-test-topic", "any".getBytes, message)
 
-    val decoder = new TestDecoder()
     producer.send(data)
     producer.close()
-
+    val decoder = new TestDecoder()
     val topic = Map("integration-test-topic" -> 1)
     val consumerConnector: ConsumerConnector = Consumer.create(new ConsumerConfig(processorConfig))
-    val topicMessageStreams = consumerConnector.createMessageStreams(topic, decoder)
+    val topicMessageStreams = consumerConnector.createMessageStreams(topic, decoder, decoder)
 
-    for((topic, streams) <- topicMessageStreams) {
-      val messageList = streams.head.head.message getOrElse List()
-      processorFun(messageList)
+    for ((topic, messageStreams) <- topicMessageStreams) {
+      for (messageStream <- messageStreams) {
+        val iterator = messageStream.iterator
+        if (iterator.hasNext) {
+          val msg = iterator.next
+          println("received message: " + msg)
+          processorFun(msg.message.head)
+        }
+      }
     }
   }
 
