@@ -16,7 +16,7 @@ trait KafkaSpanReceiverFactory { self: App =>
   val defaultKafkaSessionTimeout = "4000"
   val defaultKafkaSyncTime = "200"
   val defaultKafkaAutoOffset = "largest"
-  val defaultKafkaTopics = Map("test" -> 1)
+  val defaultKafkaTopics = Map("zipkin_kafka" -> 1)
 
   val kafkaTopics = flag[Map[String, Int]]("zipkin.kafka.topics", defaultKafkaTopics, "kafka topics to collect from")
   val kafkaServer = flag("zipkin.kafka.server", defaultZookeeperServer, "kafka server to connect")
