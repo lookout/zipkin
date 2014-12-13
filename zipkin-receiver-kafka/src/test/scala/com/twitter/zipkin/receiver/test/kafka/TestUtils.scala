@@ -18,7 +18,7 @@ object TestUtils {
 
   val seededRandom = new Random(192348092834L)
   val random = new Random
-  val zookeeperConnect = "127.0.0.1:2182"
+  val zookeeperConnect = "localhost:2181"
 
 
   // 0 - kafka, 1 - zk
@@ -48,12 +48,11 @@ object TestUtils {
   def startKafkaServer() = {
     val logDir = tempDir()
     val props = new Properties() {
-      put("hostname", "127.0.0.1")
+      put("host.name", "localhost")
       put("port", ports(0).toString)
-      put("brokerid", "1")
-      put("log.dir", String.valueOf(logDir))
-      put("enable.zookeeper", "true")
-      put("zk.connect", zookeeperConnect)
+      put("broker.id", "0")
+      put("log.dirs", String.valueOf(logDir))
+      put("zookeeper.connect", zookeeperConnect)
     }
     val kafkaServer = new KafkaServer(new KafkaConfig(props))
     kafkaServer.startup
@@ -67,16 +66,19 @@ object TestUtils {
   }
 
   def kafkaProducerProps = new Properties() {
-    put("producer.type", "sync")
-    put("broker.list", "1:127.0.0.1:" + ports(0).toString)
+    put("producer.type"       , "sync")
+    put("metadata.broker.list", "localhost:" + ports(0).toString)
+    put("partitioner.class"   , "kafka.producer.DefaultPartitioner")
+    put("serializer.class"    , "kafka.serializer.DefaultEncoder");
   }
 
   def kafkaProcessorProps = new Properties() {
-    put("groupid", "unit-test-id")
-    put("zk.connect", "127.0.0.1:2182")
-    put("autooffset.reset", "largest")
-    put("consumerid", "consumerid")
-    put("consumer.timeout.ms", "-1")
+    put("group.id"                    , "zipkinId")
+    put("zookeeper.connect"           , "localhost:2181")
+    put("auto.offset.reset"           , "smallest")
+    put("zookeeper.session.timeout.ms", "400")
+    put("zookeeper.sync.time.ms"      , "200")
+    put("auto.commit.interval.ms"     , "1000")
   }
 
 }
@@ -86,15 +88,16 @@ class EmbeddedZookeeper(connectString: String) {
   val port = connectString.split(":")(1).toInt
 
   val zkProps = new Properties {
-    put("dataDir", String.valueOf(dataDir))
-    put("clientPort", String.valueOf(port))
-    put("tickTime", "2000")
+    put("dataDir"      , String.valueOf(dataDir))
+    put("clientPort"   , String.valueOf(port))
+    put("tickTime"     , "2000")
     put("maxClientCnxs", "100")
   }
 
-  val zk = new ZooKeeperServerMain()
-  val conf: ServerConfig = new ServerConfig()
+  val zk                      = new ZooKeeperServerMain()
+  val conf: ServerConfig      = new ServerConfig()
   val qConf: QuorumPeerConfig = new QuorumPeerConfig()
+
   qConf.parseProperties(zkProps)
   conf.readFrom(qConf)
 
