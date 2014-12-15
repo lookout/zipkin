@@ -25,8 +25,9 @@ import com.twitter.zipkin.common.Span
 import com.twitter.zipkin.conversions.thrift._
 import com.twitter.zipkin.gen
 import kafka.message.Message
-import kafka.producer.{ProducerData, Producer}
+import kafka.producer._
 import kafka.serializer.Encoder
+import java.nio.charset.StandardCharsets
 
 class Kafka(
   kafka: Producer[String, gen.Span],
@@ -36,11 +37,16 @@ class Kafka(
 
   private[this] val log = Logger.get()
 
+  def send(message: String, partition: String = null): Unit = {
+    send(new String(message.getBytes(StandardCharsets.UTF_8)),
+      if (partition == null) null else new String(partition.getBytes(StandardCharsets.UTF_8)))
+  }
+
   def apply(req: Span): Future[Unit] = {
     statsReceiver.counter("try").incr()
-    val producerData = new ProducerData[String, gen.Span](topic, Seq(req.toThrift))
+
     Future {
-      kafka.send(producerData)
+      kafka.send(new KeyedMessage(topic, req.toThrift))
     } onSuccess { (_) =>
       statsReceiver.counter("success").incr()
     }
@@ -56,6 +62,7 @@ class SpanEncoder extends Encoder[gen.Span] {
   val serializer = new BinaryThriftStructSerializer[gen.Span] {
     def codec = gen.Span
   }
+  def toBytes(span: gen.Span): Array[Byte] = serializer.toBytes(span)
 
   def toMessage(span: gen.Span): Message = {
     new Message(serializer.toBytes(span))
