@@ -100,7 +100,7 @@ class QueryExtractorTest extends FunSuite {
         Seq(BinaryAnnotation("http.responsecode", ByteBuffer.wrap("500".getBytes), AnnotationType.String, None)))
   }
 
-  test("parse key value annotations with slash") {
+  ignore("parse key value annotations with slash") {
     val r = request(
       "serviceName" -> "myService",
       "annotationQuery" -> "http.uri=/sessions")
