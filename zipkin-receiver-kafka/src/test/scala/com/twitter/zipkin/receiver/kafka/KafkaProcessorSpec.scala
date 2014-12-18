@@ -24,19 +24,20 @@ import java.io._
 
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.server.TwitterServer
-import com.twitter.zipkin.cassandra.CassieSpanStoreFactory
-import com.twitter.zipkin.storage.WriteSpanStore
+// import com.twitter.zipkin.cassandra.CassieSpanStoreFactory
+// import com.twitter.zipkin.storage.WriteSpanStore
 import com.twitter.zipkin.zookeeper.ZooKeeperClientFactory
 
 import java.util.Properties
 import com.twitter.zipkin.conversions.thrift._
 import com.twitter.app.{App, Flaggable}
+import com.twitter.zipkin.thriftscala
 
 @RunWith(classOf[JUnitRunner])
 class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
 
-  val serializer = new BinaryThriftStructSerializer[ThriftSpan] {
-    def codec = ThriftSpan
+  val serializer = new BinaryThriftStructSerializer[thriftscala.Span] {
+    def codec = thriftscala.Span
   }
 
   val topic = Map("integration-test-topic" -> 1)
@@ -59,7 +60,7 @@ class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
 
       def encode(span: Span) = {
         val gspan = spanToThriftSpan(span)
-        deserializer.toBytes(gspan.toThrift)
+        deserializer.toBytes(gspan)
       }
   }
 

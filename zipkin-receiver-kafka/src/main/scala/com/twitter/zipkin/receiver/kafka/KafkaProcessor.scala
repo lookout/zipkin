@@ -37,7 +37,7 @@ class KafkaProcessor(
     val threadCount = topics.foldLeft(0) { case (sum, (_, a)) => sum + a }
     val pool = Executors.newFixedThreadPool(threadCount)
     for {
-      (topic, streams) <- consumerConnector.createMessageStreams(topics, decoder, decoder)
+      (topic, streams) <- consumerConnector.createMessageStreams(topics, decoder)
       stream <- streams
     } pool.submit(new KafkaStreamProcessor(stream, process))
     pool

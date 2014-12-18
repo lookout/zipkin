@@ -34,7 +34,7 @@ trait KafkaConfig extends Config[Kafka] {
     properties.put("zookeeper.connect", zkConnectString)
     properties.put("serializer.class", "com.twitter.zipkin.collector.SpanEncoder")
     properties.put("producer.type", "sync")
-    val producer = new Producer[String, gen.Span](new ProducerConfig(properties))
+    val producer = new Producer[String, thriftscala.Span](new ProducerConfig(properties))
     new Kafka(producer, topic, statsReceiver.scope("kafka"))
   }
 }

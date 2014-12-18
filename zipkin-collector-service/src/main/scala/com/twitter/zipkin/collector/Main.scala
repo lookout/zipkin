@@ -14,8 +14,7 @@
  *  limitations under the License.
  *
  */
-
-import com.twitter.zipkin.gen.{Span => ThriftSpan}
+import com.twitter.zipkin.thriftscala.{Span => ThriftSpan}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.server.TwitterServer
 import com.twitter.util.{Await, Future}
