@@ -2,7 +2,7 @@ package com.twitter.zipkin.receiver.kafka
 
 import com.twitter.zipkin.receiver.test.kafka.{TestUtils, EmbeddedZookeeper}
 import com.twitter.zipkin.common._
-import com.twitter.zipkin.gen.{Span => ThriftSpan}
+import com.twitter.zipkin.thriftscala.{Span => ThriftSpan}
 import com.twitter.zipkin.conversions.thrift.{thriftSpanToSpan, spanToThriftSpan}
 import com.twitter.util.{Await, Future, Promise}
 import com.twitter.scrooge.BinaryThriftStructSerializer
@@ -32,6 +32,7 @@ import java.util.Properties
 import com.twitter.zipkin.conversions.thrift._
 import com.twitter.app.{App, Flaggable}
 import com.twitter.zipkin.thriftscala
+import kafka.producer.KeyedMessage
 
 @RunWith(classOf[JUnitRunner])
 class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
@@ -59,8 +60,8 @@ class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
       def fromBytes(bytes: Array[Byte]): Option[List[ThriftSpan]] = Some(List(deserializer.fromBytes(bytes)))
 
       def encode(span: Span) = {
-        val gspan = spanToThriftSpan(span)
-        deserializer.toBytes(gspan)
+        val tspan = spanToThriftSpan(span)
+        deserializer.toBytes(tspan.toThrift)
       }
   }
 
@@ -69,8 +70,10 @@ class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
   val producerConfig = TestUtils.kafkaProducerProps
   val processorConfig = TestUtils.kafkaProcessorProps
   val decoder = new TestDecoder()
+  val defaultKafkaTopics = Map("zipkin_kafka" -> 1 )
 
-  def processorFun(spans: Seq[ThriftSpan]): Future[Unit] = {
+
+  def validateSpan(spans: Seq[ThriftSpan]): Future[Unit] = {
     assert( 1 == spans.length, "received more spans than sent" )
     val message = spans.head.toSpan
     assert(message.traceId == 1234, "traceId mismatch")
@@ -102,21 +105,6 @@ class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
     zkServer.shutdown
   }
 
-  val defaultZookeeperServer = "localhost:2181"
-  val defaultKafkaGroupId = "zipkinId"
-  val defaultKafkaSessionTimeout = "400"
-  val defaultKafkaSyncTime = "200"
-  val defaultKafkaAutoOffset = "largest"
-  val defaultKafkaTopics = Map("zipkin_kafka" -> 1 )
-
-  val proops = new Properties() {
-    put("group.id", defaultKafkaGroupId)
-    put("zookeeper.connect", defaultZookeeperServer)
-    put("zookeeper.session.timeout.ms", defaultKafkaSessionTimeout)
-    put("zookeeper.sync.time.ms", defaultKafkaSyncTime)
-    put("auto.offset.reset", defaultKafkaAutoOffset)
-  }
-
   test("kafka processor test simple2") {
     val producer = new Producer[Array[Byte], Array[Byte]](new ProducerConfig(producerConfig))
     val message = createMessage()
@@ -132,7 +120,7 @@ class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
       }, new SpanDecoder)
 
     Await.result(recvdSpan)
-    processorFun(recvdSpan.get().getOrElse(null))
+    validateSpan(recvdSpan.get().getOrElse(null))
   }
 
 }

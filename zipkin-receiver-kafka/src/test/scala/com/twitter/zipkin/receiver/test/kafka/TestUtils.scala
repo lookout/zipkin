@@ -9,10 +9,11 @@ import kafka.server.{KafkaServer, KafkaConfig}
 import kafka.utils.{Utils, ZKStringSerializer}
 
 import org.I0Itec.zkclient.ZkClient
-// import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FileUtils
 import org.apache.zookeeper.server.{ZooKeeperServerMain, ServerConfig}
 import org.apache.zookeeper.server.NIOServerCnxn
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig
+import kafka.utils.SystemTime
 
 object TestUtils {
 

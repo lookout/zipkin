@@ -25,8 +25,10 @@ import com.twitter.zipkin.common.Span
 import com.twitter.zipkin.conversions.thrift._
 import com.twitter.zipkin.thriftscala
 import kafka.message.Message
-import kafka.producer.{ProducerData, Producer}
+import kafka.producer.Producer
+import kafka.producer.KeyedMessage
 import kafka.serializer.Encoder
+import java.nio.charset.StandardCharsets
 
 class Kafka(
   kafka: Producer[String, thriftscala.Span],
@@ -36,11 +38,16 @@ class Kafka(
 
   private[this] val log = Logger.get()
 
+  def send(message: String, partition: String = null): Unit = {
+    send(new String(message.getBytes(StandardCharsets.UTF_8)),
+      if (partition == null) null else new String(partition.getBytes(StandardCharsets.UTF_8)))
+  }
+
   def apply(req: Span): Future[Unit] = {
     statsReceiver.counter("try").incr()
-    val producerData = new ProducerData[String, thriftscala.Span](topic, Seq(req.toThrift))
+
     Future {
-      kafka.send(producerData)
+      kafka.send(new KeyedMessage(topic, req.toThrift))
     } onSuccess { (_) =>
       statsReceiver.counter("success").incr()
     }
@@ -56,6 +63,7 @@ class SpanEncoder extends Encoder[thriftscala.Span] {
   val serializer = new BinaryThriftStructSerializer[thriftscala.Span] {
     def codec = thriftscala.Span
   }
+  def toBytes(span: thriftscala.Span): Array[Byte] = serializer.toBytes(span)
 
   def toMessage(span: thriftscala.Span): Message = {
     new Message(serializer.toBytes(span))
