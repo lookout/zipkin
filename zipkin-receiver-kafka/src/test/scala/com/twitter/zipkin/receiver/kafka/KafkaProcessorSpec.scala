@@ -105,7 +105,7 @@ class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
     zkServer.shutdown
   }
 
-  test("kafka processor test simple2") {
+  test("kafka processor test") {
     val producer = new Producer[Array[Byte], Array[Byte]](new ProducerConfig(producerConfig))
     val message = createMessage()
     val data = new KeyedMessage("zipkin_kafka", "any".getBytes, message)

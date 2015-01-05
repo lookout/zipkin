@@ -7,12 +7,13 @@ require 'hermann/discovery/zookeeper'
 module Trace
   class ZipkinKafkaTracer < Tracer
     TRACER_CATEGORY = "zipkin"
-    KAFKA_TOPIC = "zipkin_kafka"
+    DEFAULT_KAFKA_TOPIC = "zipkin_kafka"
 
-    def initialize(zookeepers)
+    def initialize(zookeepers, opts={})
       broker_ids = Hermann::Discovery::Zookeeper.new(zookeepers).get_brokers
-      @producer = Hermann::Producer.new(nil, broker_ids)
-      reset
+      @producer  = Hermann::Producer.new(nil, broker_ids)
+      @logger    = opts[:logger]
+      @topic     = opts[:topic] || DEFAULT_KAFKA_TOPIC
     end
 
     def record(id, annotation)
@@ -26,10 +27,7 @@ module Trace
         span.annotations << annotation
       end
 
-      @count += 1
-      # if @count >= @max_buffer || (annotation.is_a?(Annotation) && annotation.value == Annotation::SERVER_SEND)
-        flush!
-      # end
+      flush!
     end
 
     def set_rpc_name(id, name)
@@ -46,29 +44,21 @@ module Trace
       end
     end
 
-    def reset
-      @count = 0
-      @spans = {}
-    end
-
     def flush!
-      # @scribe.batch do
       begin
         messages = @spans.values.map do |span|
           buf = ''
           trans = Thrift::MemoryBufferTransport.new(buf)
           oprot = Thrift::BinaryProtocol.new(trans)
           span.to_thrift.write(oprot)
-          # binary = Base64.encode64(buf).gsub("\n", "")
-          # @scribe.log(binary, TRACER_CATEGORY)
-          @producer.push(buf, :topic => KAFKA_TOPIC).value!
+          @producer.push(buf, :topic => @topic).value!
         end
       rescue => e
-        puts "....Exception: #{e.message}"
-        puts e.backtrace.join("\n")
+        if @logger
+          @logger.error("Exception: #{e.message}")
+          @logger.error(e.backtrace.join("\n"))
+        end
       end
-
-      reset
     end
   end
 end
