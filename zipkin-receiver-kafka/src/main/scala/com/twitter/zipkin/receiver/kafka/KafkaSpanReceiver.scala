@@ -1,13 +1,11 @@
 package com.twitter.zipkin.receiver.kafka
 
-import com.twitter.app.{App, Flaggable}
+import com.twitter.app.App
 import java.util.Properties
 import com.twitter.zipkin.thriftscala.{Span => ThriftSpan}
 import com.twitter.zipkin.collector.SpanReceiver
-import com.twitter.zipkin.conversions.thrift._
 import com.twitter.util.{Closable, Future, Time}
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
-import com.twitter.zipkin.zookeeper.ZooKeeperClientFactory
 
 trait KafkaSpanReceiverFactory { self: App =>
   val defaultZookeeperServer = "localhost:2181"

@@ -22,6 +22,17 @@ describe ZipkinTracer::RackHandler do
     allow(::Trace::Endpoint).to receive(:host_to_i32).and_return(host_ip)
   }
 
+  context 'configured to use kafka' do
+    let(:zookeeper) { 'localhost:2181' }
+    let(:zipkinKafkaTracer) { double('ZipkinKafkaTracer') }
+
+    it 'creates a zipkin kafka tracer' do
+      allow(::Trace::ZipkinKafkaTracer).to receive(:new) { zipkinKafkaTracer }
+      expect(::Trace).to receive(:tracer=).with(zipkinKafkaTracer)
+      middleware(app, :zookeeper => zookeeper)
+    end
+  end
+
   context 'configured without plugins' do
     subject { middleware(app) }
 

@@ -1,7 +1,6 @@
 package com.twitter.zipkin.receiver.kafka
 
 import com.twitter.zipkin.thriftscala.{Span => ThriftSpan}
-import com.twitter.ostrich.admin.{Service => OstrichService, ServiceTracker}
 import kafka.consumer.{Consumer, ConsumerConnector, ConsumerConfig}
 import kafka.serializer.Decoder
 import com.twitter.util.{Closable, CloseAwaitably, FuturePool, Future, Time}
@@ -11,7 +10,6 @@ import java.net.{SocketAddress, InetSocketAddress}
 
 import com.twitter.scrooge.BinaryThriftStructSerializer
 import com.twitter.zipkin.conversions.thrift.{thriftSpanToSpan, spanToThriftSpan}
-import java.io._
 import kafka.message.Message
 
 object KafkaProcessor {

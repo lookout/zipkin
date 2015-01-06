@@ -4,7 +4,6 @@ import com.twitter.logging.Logger
 import kafka.consumer.KafkaStream
 import com.twitter.zipkin.thriftscala.{Span => ThriftSpan}
 import com.twitter.util.{Await, Future}
-import java.io._
 
 case class KafkaStreamProcessor(
   stream: KafkaStream[Option[List[ThriftSpan]], Option[List[ThriftSpan]]],

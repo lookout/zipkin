@@ -36,7 +36,7 @@ module ZipkinTracer extend self
         scribe = config[:scribe_server] ? Scribe.new(config[:scribe_server]) : Scribe.new()
         careless_scribe = CarelessScribe.new(scribe)
         scribe_max_buffer = config[:scribe_max_buffer] ? config[:scribe_max_buffer] : 10
-        # ::Trace.tracer = ::Trace::ZipkinTracer.new(careless_scribe, scribe_max_buffer)
+        ::Trace.tracer = ::Trace::ZipkinTracer.new(careless_scribe, scribe_max_buffer)
       elsif config[:zookeeper]
         ::Trace.tracer = ::Trace::ZipkinKafkaTracer.new(config[:zookeeper])
       end
