@@ -24,8 +24,6 @@ import java.io._
 
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.server.TwitterServer
-// import com.twitter.zipkin.cassandra.CassieSpanStoreFactory
-// import com.twitter.zipkin.storage.WriteSpanStore
 import com.twitter.zipkin.zookeeper.ZooKeeperClientFactory
 
 import java.util.Properties

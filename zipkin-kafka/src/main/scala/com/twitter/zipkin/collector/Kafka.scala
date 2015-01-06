@@ -25,8 +25,7 @@ import com.twitter.zipkin.common.Span
 import com.twitter.zipkin.conversions.thrift._
 import com.twitter.zipkin.thriftscala
 import kafka.message.Message
-import kafka.producer.Producer
-import kafka.producer.KeyedMessage
+import kafka.producer.{Producer, KeyedMessage}
 import kafka.serializer.Encoder
 import java.nio.charset.StandardCharsets
 
