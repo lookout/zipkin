@@ -37,28 +37,28 @@ module Trace
     end
 
     private
-    def get_span_for_id(id)
-      key = id.span_id.to_s
-      @spans[key] ||= begin
-        Span.new("", id)
+      def get_span_for_id(id)
+        key = id.span_id.to_s
+        @spans[key] ||= begin
+          Span.new("", id)
+        end
       end
-    end
 
-    def flush!
-      begin
-        messages = @spans.values.map do |span|
-          buf = ''
-          trans = Thrift::MemoryBufferTransport.new(buf)
-          oprot = Thrift::BinaryProtocol.new(trans)
-          span.to_thrift.write(oprot)
-          @producer.push(buf, :topic => @topic).value!
-        end
-      rescue => e
-        if @logger
-          @logger.error("Exception: #{e.message}")
-          @logger.error(e.backtrace.join("\n"))
+      def flush!
+        begin
+          messages = @spans.values.map do |span|
+            buf = ''
+            trans = Thrift::MemoryBufferTransport.new(buf)
+            oprot = Thrift::BinaryProtocol.new(trans)
+            span.to_thrift.write(oprot)
+            @producer.push(buf, :topic => @topic).value!
+          end
+        rescue => e
+          if @logger
+            @logger.error("Exception: #{e.message}")
+            @logger.error(e.backtrace.join("\n"))
+          end
         end
       end
-    end
   end
 end
