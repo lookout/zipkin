@@ -27,7 +27,8 @@ import com.twitter.zipkin.thriftscala
 import kafka.message.Message
 import kafka.producer.{Producer, KeyedMessage}
 import kafka.serializer.Encoder
-import java.nio.charset.StandardCharsets
+import java.nio.charset.Charset
+
 
 class Kafka(
   kafka: Producer[String, thriftscala.Span],
@@ -38,8 +39,8 @@ class Kafka(
   private[this] val log = Logger.get()
 
   def send(message: String, partition: String = null): Unit = {
-    send(new String(message.getBytes(StandardCharsets.UTF_8)),
-      if (partition == null) null else new String(partition.getBytes(StandardCharsets.UTF_8)))
+    send(new String(message.getBytes(Charset.forName("UTF-8"))),
+      if (partition == null) null else new String(partition.getBytes(Charset.forName("UTF-8"))))
   }
 
   def apply(req: Span): Future[Unit] = {

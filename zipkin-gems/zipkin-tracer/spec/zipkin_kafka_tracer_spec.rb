@@ -1,25 +1,14 @@
 require 'spec_helper'
 
 describe Trace::ZipkinKafkaTracer do
-  let(:zookeepers) { 'localhost:2181' }
-  let(:zk) { double('broker_ids') }
-  let(:id)                { double('id') }
-  let(:span)              { double('span') }
-
-  before do
-    allow(Hermann::Discovery::Zookeeper).to receive(:new) { zk }
-    allow(zk).to receive(:get_brokers)
-    allow(Hermann::Producer).to receive(:new)
-  end
+  let(:id)   { double('id') }
+  let(:span) { double('span') }
 
   describe '#initialize' do
     context 'with default settings' do
-      subject { described_class.new(zookeepers)}
-
       it 'has nil logger' do
         expect(subject.instance_variable_get(:@logger)).to be nil
       end
-
       it 'has default topic' do
         expect(subject.instance_variable_get(:@topic)).to eq Trace::ZipkinKafkaTracer::DEFAULT_KAFKA_TOPIC
       end
@@ -29,15 +18,28 @@ describe Trace::ZipkinKafkaTracer do
       let(:logger) { double('logger') }
       let(:topic)  { 'topic' }
 
-      subject { described_class.new(zookeepers, {:logger => logger, :topic => topic})}
+      subject { described_class.new({:logger => logger, :topic => topic}) }
 
       it 'has logger' do
         expect(subject.instance_variable_get(:@logger)).to be logger
       end
-
       it 'has an optional topic' do
         expect(subject.instance_variable_get(:@topic)).to eq topic
       end
+    end
+  end
+
+  describe '#connect' do
+    let(:zookeepers) { 'localhost:2181'     }
+    let(:zk)         { double('broker_ids') }
+    let(:producer)   { double('producer')   }
+
+    it 'connects to zookeeper to create the producer' do
+      allow(Hermann::Discovery::Zookeeper).to receive(:new) { zk }
+      allow(zk).to receive(:get_brokers)
+      allow(Hermann::Producer).to receive(:new) { producer }
+      subject.connect(zookeepers)
+      expect(subject.instance_variable_get(:@producer)).to eq producer
     end
   end
 
@@ -50,8 +52,6 @@ describe Trace::ZipkinKafkaTracer do
         def initialize;end
       end
     end
-
-    subject { described_class.new(zookeepers)}
 
     let(:binary_annotation) { ::Trace::BinaryAnnotation.new }
     let(:annotation)        { ::Trace::Annotation.new }
@@ -81,8 +81,6 @@ describe Trace::ZipkinKafkaTracer do
   end
 
   describe '#set_rpc_name' do
-    subject { described_class.new(zookeepers)}
-
     let(:name) { 'name' }
 
     it 'returns if id already sampled' do

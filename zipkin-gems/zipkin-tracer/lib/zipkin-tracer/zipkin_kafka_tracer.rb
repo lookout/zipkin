@@ -1,19 +1,22 @@
 require 'finagle-thrift'
 require 'finagle-thrift/tracer'
-require 'hermann'
 require 'hermann/producer'
 require 'hermann/discovery/zookeeper'
 
 module Trace
   class ZipkinKafkaTracer < Tracer
-    TRACER_CATEGORY = "zipkin"
-    DEFAULT_KAFKA_TOPIC = "zipkin_kafka"
+    TRACER_CATEGORY = "zipkin".freeze
+    DEFAULT_KAFKA_TOPIC = "zipkin_kafka".freeze
 
-    def initialize(zookeepers, opts={})
+    def initialize(opts={})
+      @logger = opts[:logger]
+      @topic  = opts[:topic] || DEFAULT_KAFKA_TOPIC
+    end
+
+    # need to connect after initialization
+    def connect(zookeepers)
       broker_ids = Hermann::Discovery::Zookeeper.new(zookeepers).get_brokers
       @producer  = Hermann::Producer.new(nil, broker_ids)
-      @logger    = opts[:logger]
-      @topic     = opts[:topic] || DEFAULT_KAFKA_TOPIC
     end
 
     def record(id, annotation)
@@ -45,19 +48,12 @@ module Trace
       end
 
       def flush!
-        begin
-          messages = @spans.values.map do |span|
-            buf = ''
-            trans = Thrift::MemoryBufferTransport.new(buf)
-            oprot = Thrift::BinaryProtocol.new(trans)
-            span.to_thrift.write(oprot)
-            @producer.push(buf, :topic => @topic).value!
-          end
-        rescue => e
-          if @logger
-            @logger.error("Exception: #{e.message}")
-            @logger.error(e.backtrace.join("\n"))
-          end
+        messages = @spans.values.map do |span|
+          buf = ''
+          trans = Thrift::MemoryBufferTransport.new(buf)
+          oprot = Thrift::BinaryProtocol.new(trans)
+          span.to_thrift.write(oprot)
+          @producer.push(buf, :topic => @topic).value!
         end
       end
   end
