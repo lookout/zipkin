@@ -18,7 +18,6 @@ import kafka.producer._
 import kafka.serializer.Decoder
 import kafka.server.KafkaServer
 
-import kafka.serializer.Decoder
 import com.twitter.zipkin.collector.{SpanReceiver, ZipkinQueuedCollectorFactory}
 import java.io._
 
@@ -27,10 +26,8 @@ import com.twitter.server.TwitterServer
 import com.twitter.zipkin.zookeeper.ZooKeeperClientFactory
 
 import java.util.Properties
-import com.twitter.zipkin.conversions.thrift._
 import com.twitter.app.{App, Flaggable}
 import com.twitter.zipkin.thriftscala
-import kafka.producer.KeyedMessage
 
 @RunWith(classOf[JUnitRunner])
 class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {

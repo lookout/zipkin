@@ -52,5 +52,4 @@ trait KafkaSpanReceiverFactory { self: App =>
       Closable.sequence(service).close(deadline)
     }
   }
-
 }

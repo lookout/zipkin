@@ -26,5 +26,4 @@ case class KafkaStreamProcessor[T](
         log.error(s"${e.getCause}")
     }
   }
-
 }
