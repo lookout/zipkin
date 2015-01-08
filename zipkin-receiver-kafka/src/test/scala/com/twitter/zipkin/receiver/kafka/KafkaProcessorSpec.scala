@@ -115,7 +115,7 @@ class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
     val service = KafkaProcessor(defaultKafkaTopics, processorConfig, { s =>
         recvdSpan.setValue(Some(s))
         Future.value(true)
-      }, new SpanDecoder)
+      }, new SpanDecoder, new SpanDecoder)
 
     Await.result(recvdSpan)
     validateSpan(recvdSpan.get().getOrElse(null))
