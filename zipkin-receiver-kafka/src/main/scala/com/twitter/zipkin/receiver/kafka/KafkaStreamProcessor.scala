@@ -21,9 +21,10 @@ case class KafkaStreamProcessor[T](
       }
     }
     catch {
-      case e: Exception =>
+      case e: Exception => {
         e.printStackTrace()
         log.error(s"${e.getCause}")
+      }
     }
   }
 }

@@ -16,6 +16,11 @@ trait KafkaSpanReceiverFactory { self: App =>
   val defaultKafkaSyncTime = "200"
   val defaultKafkaAutoOffset = "smallest"
   val defaultKafkaTopics = Map("zipkin_kafka" -> 1)
+  val defaultAutoCommitInterval = "10"
+  val defaultConsumerId = "zipkin-consumerid"
+  val defaultConsumerTimeout = "-1"
+  val defaultRebalanceMaxRetries = "4"
+  val defaultNumConsumerFetchers = "2"
 
   val kafkaTopics = flag[Map[String, Int]]("zipkin.kafka.topics", defaultKafkaTopics, "kafka topics to collect from")
   val kafkaServer = flag("zipkin.kafka.server", defaultKafkaServer, "kafka server to connect")
@@ -24,6 +29,13 @@ trait KafkaSpanReceiverFactory { self: App =>
   val kafkaSessionTimeout = flag("zipkin.kafka.zk.sessionTimeout", defaultKafkaSessionTimeout, "kafka zk session timeout in ms")
   val kafkaSyncTime = flag("zipkin.kafka.zk.syncTime", defaultKafkaSyncTime, "kafka zk sync time in ms")
   val kafkaAutoOffset = flag("zipkin.kafka.zk.autooffset", defaultKafkaAutoOffset, "kafka zk auto offset [smallest|largest]")
+
+  val kafkaAutoCommitInterval = flag("zipkin.kafka.autocommitInterval", defaultAutoCommitInterval, "auto commit interval")
+  val kafkaConsumerId = flag("zipkin.kafka.consumerId", defaultConsumerId, "consumer ID")
+  val kafkaConsumerTimeout = flag("zipkin.kafka.consumerTimeout", defaultConsumerTimeout, "consumer timeout")
+  val kafkaRebalanceMaxRetries = flag("zipkin.kafka.rebalanceMaxRetries", defaultRebalanceMaxRetries, "rebalance max retries")
+  val kafkaNumConsumerFetchers = flag("zipkin.kafka.consumerFetchers", defaultNumConsumerFetchers, "num consumer fetchers" )
+
 
   def newKafkaSpanReceiver[T](
     process: Seq[ThriftSpan] => Future[Unit],
@@ -39,11 +51,11 @@ trait KafkaSpanReceiverFactory { self: App =>
       put("zookeeper.session.timeout.ms", kafkaSessionTimeout())
       put("zookeeper.sync.time.ms", kafkaSyncTime())
       put("auto.offset.reset", kafkaAutoOffset())
-      put("auto.commit.interval.ms", "10")
-      put("consumer.id", "zipkin-consumerid")
-      put("consumer.timeout.ms", "-1")
-      put("rebalance.max.retries", "4")
-      put("num.consumer.fetchers", "2")
+      put("auto.commit.interval.ms", kafkaAutoCommitInterval())
+      put("consumer.id", kafkaConsumerId())
+      put("consumer.timeout.ms", kafkaConsumerTimeout())
+      put("rebalance.max.retries", kafkaRebalanceMaxRetries())
+      put("num.consumer.fetchers", kafkaNumConsumerFetchers())
     }
 
     val service = KafkaProcessor(kafkaTopics(), receiverProps, process, keyDecoder getOrElse KafkaProcessor.defaultKeyDecoder, valueDecoder)
