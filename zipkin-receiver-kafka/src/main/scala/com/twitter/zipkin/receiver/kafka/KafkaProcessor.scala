@@ -13,7 +13,7 @@ import kafka.message.Message
 
 object KafkaProcessor {
 
-  type KafkaDecoder = Decoder[Option[List[ThriftSpan]]]
+  type KafkaDecoder = Decoder[List[ThriftSpan]]
 
   val defaultKeyDecoder = new StringDecoder()
 
