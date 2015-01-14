@@ -18,7 +18,6 @@ import kafka.producer._
 import kafka.serializer.Decoder
 import kafka.server.KafkaServer
 
-import kafka.serializer.Decoder
 import com.twitter.zipkin.collector.{SpanReceiver, ZipkinQueuedCollectorFactory}
 import java.io._
 
@@ -27,47 +26,19 @@ import com.twitter.server.TwitterServer
 import com.twitter.zipkin.zookeeper.ZooKeeperClientFactory
 
 import java.util.Properties
-import com.twitter.zipkin.conversions.thrift._
 import com.twitter.app.{App, Flaggable}
 import com.twitter.zipkin.thriftscala
-import kafka.producer.KeyedMessage
 
 @RunWith(classOf[JUnitRunner])
 class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
 
-  val serializer = new BinaryThriftStructSerializer[thriftscala.Span] {
-    def codec = thriftscala.Span
-  }
-
   val topic = Map("integration-test-topic" -> 1)
   val validSpan = Span(123, "boo", 456, None, List(new Annotation(1, "bah", None)), Nil)
-
-  case class TestDecoder extends Decoder[Option[List[ThriftSpan]]] {
-      val deserializer = serializer
-
-      def toEvent(message: Message): Option[List[ThriftSpan]] = {
-
-        val buffer = message.payload
-        val payload = new Array[Byte](buffer.remaining)
-        buffer.get(payload)
-
-        val span = deserializer.fromBytes(payload)
-        Some(List(span))
-      }
-
-      def fromBytes(bytes: Array[Byte]): Option[List[ThriftSpan]] = Some(List(deserializer.fromBytes(bytes)))
-
-      def encode(span: Span) = {
-        val tspan = spanToThriftSpan(span)
-        deserializer.toBytes(tspan.toThrift)
-      }
-  }
-
   var zkServer: EmbeddedZookeeper = _
   var testKafkaServer: KafkaServer = _
   val producerConfig = TestUtils.kafkaProducerProps
   val processorConfig = TestUtils.kafkaProcessorProps
-  val decoder = new TestDecoder()
+  val decoder = new SpanDecoder()
   val defaultKafkaTopics = Map("zipkin_kafka" -> 1 )
 
 
@@ -87,7 +58,7 @@ class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
   def createMessage(): Array[Byte] = {
     val annotation = Annotation(1, "value", Some(Endpoint(1, 2, "service")))
     val message = Span(1234, "methodName", 4567, None, List(annotation), Nil)
-    val codec = new TestDecoder()
+    val codec = new SpanDecoder()
     codec.encode(message)
   }
 
@@ -107,18 +78,17 @@ class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
     val producer = new Producer[Array[Byte], Array[Byte]](new ProducerConfig(producerConfig))
     val message = createMessage()
     val data = new KeyedMessage("zipkin_kafka", "any".getBytes, message)
-    val recvdSpan = new Promise[Option[Seq[ThriftSpan]]]
+    val recvdSpan = new Promise[Seq[ThriftSpan]]
 
     producer.send(data)
     producer.close()
 
     val service = KafkaProcessor(defaultKafkaTopics, processorConfig, { s =>
-        recvdSpan.setValue(Some(s))
+        recvdSpan.setValue(s)
         Future.value(true)
-      }, new SpanDecoder)
+      }, new SpanDecoder, new SpanDecoder)
 
     Await.result(recvdSpan)
-    validateSpan(recvdSpan.get().getOrElse(null))
+    validateSpan(recvdSpan.get())
   }
-
 }

@@ -21,7 +21,6 @@ object TestUtils {
   val random = new Random
   val zookeeperConnect = "localhost:2181"
 
-
   // 0 - kafka, 1 - zk
   val ports = choosePorts(2)
 

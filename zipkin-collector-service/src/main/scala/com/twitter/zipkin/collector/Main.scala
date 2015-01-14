@@ -34,8 +34,9 @@ object ZipkinKafkaCollectorServer extends TwitterServer
   with ZooKeeperClientFactory
   with KafkaSpanReceiverFactory
 {
-  def newReceiver(receive: Seq[ThriftSpan] => Future[Unit], stats: StatsReceiver): SpanReceiver =
-    newKafkaSpanReceiver(receive, stats.scope("kafkaSpanReceiver"), new SpanDecoder())
+  def newReceiver(receive: Seq[ThriftSpan] => Future[Unit], stats: StatsReceiver): SpanReceiver = {
+    newKafkaSpanReceiver(receive, stats.scope("kafkaSpanReceiver"), Some(new SpanDecoder()), new SpanDecoder())
+  }
 
   def newSpanStore(stats: StatsReceiver): WriteSpanStore =
     newCassandraStore(stats.scope("cassie"))
