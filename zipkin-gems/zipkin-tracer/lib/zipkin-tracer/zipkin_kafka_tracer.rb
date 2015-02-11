@@ -11,6 +11,7 @@ module Trace
     def initialize(opts={})
       @logger = opts[:logger]
       @topic  = opts[:topic] || DEFAULT_KAFKA_TOPIC
+      reset
     end
 
     # need to connect after initialization
@@ -40,6 +41,10 @@ module Trace
     end
 
     private
+      def reset
+        @spans = {}
+      end
+
       def get_span_for_id(id)
         key = id.span_id.to_s
         @spans[key] ||= begin
