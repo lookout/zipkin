@@ -12,6 +12,10 @@ describe Trace::ZipkinKafkaTracer do
       it 'has default topic' do
         expect(subject.instance_variable_get(:@topic)).to eq Trace::ZipkinKafkaTracer::DEFAULT_KAFKA_TOPIC
       end
+      it 'initializes instance variables' do
+        expect(subject.instance_variable_get(:@spans)).to be_a(Hash)
+        expect(subject.instance_variable_get(:@spans).length).to eq 0
+      end
     end
 
     context 'with options' do
