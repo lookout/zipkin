@@ -34,6 +34,20 @@ class RetrySpec extends SpecificationWithJUnit {
       }
       result must_== LongWrapper(10L)
     }
+    "sleeps when exception thrown and flag set" in {
+      val t1 = System.currentTimeMillis
+      try {
+        val result = Retry(2, true) {
+          throw new Exception
+        }
+      }
+      catch {
+        case e: Throwable => null
+      }
+      val t2 = System.currentTimeMillis
+      val delta = t2 - t1
+      delta >= 2
+    }
   }
   case class LongWrapper(value:Long)
 }
