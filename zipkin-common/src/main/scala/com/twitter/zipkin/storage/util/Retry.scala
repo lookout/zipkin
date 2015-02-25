@@ -9,7 +9,7 @@ package com.twitter.zipkin.storage.util
  * supplied function is resilient to this fact.
  */
 object Retry {
-  def apply[T](n: Int)(f: => T) : T = {
+  def apply[T](n: Int, sleep: Boolean = false)(f: => T) : T = {
     var result:Option[T] = None
     var throwable:Option[Throwable] = None
 
@@ -17,7 +17,10 @@ object Retry {
       try {
         result = Option(f)
       } catch {
-        case e:Throwable => { throwable = Some(e) }
+        case e: Throwable => {
+            if (sleep) Thread.sleep(1000)
+            throwable = Some(e)
+          }
       }
     }
 
@@ -27,5 +30,6 @@ object Retry {
 
     result.get
   }
+
   class RetriesExhaustedException(msg:String, throwable:Throwable) extends RuntimeException(msg,throwable)
 }
