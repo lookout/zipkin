@@ -38,7 +38,9 @@ module ZipkinTracer extend self
         scribe_max_buffer = config[:scribe_max_buffer] ? config[:scribe_max_buffer] : 10
         ::Trace.tracer = ::Trace::ZipkinTracer.new(careless_scribe, scribe_max_buffer)
       elsif config[:zookeeper]
-        ::Trace.tracer = ::Trace::ZipkinKafkaTracer.new(config[:zookeeper])
+        kafkaTracer = ::Trace::ZipkinKafkaTracer.new
+        kafkaTracer.connect(config[:zookeeper])
+        ::Trace.tracer = kafkaTracer
       end
 
       @sample_rate = config[:sample_rate] ? config[:sample_rate] : 0.1
@@ -46,8 +48,6 @@ module ZipkinTracer extend self
       @annotate_plugin = config[:annotate_plugin]     # call for trace annotation
       @filter_plugin = config[:filter_plugin]         # skip tracing if returns false
       @whitelist_plugin = config[:whitelist_plugin]   # force sampling if returns true
-
-
     end
 
     def call(env)
