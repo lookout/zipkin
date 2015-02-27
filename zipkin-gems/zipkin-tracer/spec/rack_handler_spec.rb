@@ -29,6 +29,7 @@ describe ZipkinTracer::RackHandler do
     it 'creates a zipkin kafka tracer' do
       allow(::Trace::ZipkinKafkaTracer).to receive(:new) { zipkinKafkaTracer }
       expect(::Trace).to receive(:tracer=).with(zipkinKafkaTracer)
+      expect(zipkinKafkaTracer).to receive(:connect)
       middleware(app, :zookeeper => zookeeper)
     end
   end
