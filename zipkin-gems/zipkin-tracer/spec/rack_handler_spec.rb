@@ -22,7 +22,7 @@ describe ZipkinTracer::RackHandler do
     allow(::Trace::Endpoint).to receive(:host_to_i32).and_return(host_ip)
   }
 
-  context 'configured to use kafka' do
+  context 'configured to use kafka', :platform => :java do
     let(:zookeeper) { 'localhost:2181' }
     let(:zipkinKafkaTracer) { double('ZipkinKafkaTracer') }
 
