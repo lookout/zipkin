@@ -5,7 +5,7 @@ require 'hermann/discovery/zookeeper'
 
 module Trace
   class ZipkinKafkaTracer < Tracer
-    TRACER_CATEGORY = "zipkin".freeze
+    TRACER_CATEGORY     = "zipkin".freeze
     DEFAULT_KAFKA_TOPIC = "zipkin_kafka".freeze
 
     def initialize(opts={})

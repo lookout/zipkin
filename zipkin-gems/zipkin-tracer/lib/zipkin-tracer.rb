@@ -14,9 +14,11 @@
 require 'finagle-thrift'
 require 'finagle-thrift/trace'
 require 'scribe'
-
 require 'zipkin-tracer/careless_scribe'
-require 'zipkin-tracer/zipkin_kafka_tracer'
+
+if RUBY_PLATFORM == 'java'
+  require 'zipkin-tracer/zipkin_kafka_tracer'
+end
 
 module ZipkinTracer extend self
 
@@ -37,7 +39,7 @@ module ZipkinTracer extend self
         careless_scribe = CarelessScribe.new(scribe)
         scribe_max_buffer = config[:scribe_max_buffer] ? config[:scribe_max_buffer] : 10
         ::Trace.tracer = ::Trace::ZipkinTracer.new(careless_scribe, scribe_max_buffer)
-      elsif config[:zookeeper]
+      elsif config[:zookeeper] && RUBY_PLATFORM == 'java'
         kafkaTracer = ::Trace::ZipkinKafkaTracer.new
         kafkaTracer.connect(config[:zookeeper])
         ::Trace.tracer = kafkaTracer
