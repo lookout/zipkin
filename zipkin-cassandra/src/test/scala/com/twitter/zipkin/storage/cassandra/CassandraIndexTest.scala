@@ -64,7 +64,7 @@ class CassandraIndexTest extends FunSuite with BeforeAndAfter with MockitoSugar 
 
   before {
     FakeServer.start()
-    val keyspaceBuilder = Keyspace.static(port = FakeServer.port.get)
+    val keyspaceBuilder = Keyspace.static(port = FakeServer.port.get, username = FakeCassandra.username, password = FakeCassandra.password)
     val builder = IndexBuilder(keyspaceBuilder)
     cassandraIndex = builder.apply()
   }

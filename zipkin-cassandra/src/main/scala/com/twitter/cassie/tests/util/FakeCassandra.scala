@@ -31,6 +31,9 @@ import scala.collection.JavaConversions._
 import scala.math.min
 
 object FakeCassandra {
+  val username = "foo"
+  val password = "bar"
+
   class ServerThread(cassandra: Cassandra.Iface) extends Thread {
     setDaemon(true)
     val serverSocket = new ServerSocket(0) // so we can extract port if picked by server socket
@@ -254,7 +257,15 @@ class FakeCassandra extends Cassandra.Iface {
     }
   }
 
-  def login(auth_request: AuthenticationRequest) { throw new UnsupportedOperationException }
+  def login(auth_request: AuthenticationRequest) {
+    if(auth_request.credentials("username") == FakeCassandra.username &&
+       auth_request.credentials("password") == FakeCassandra.password){
+      true
+    }
+    else{
+      throw new AuthorizationException
+    }
+  }
 
   def get(key: ByteBuffer, column_path: ColumnPath, consistency_level: ConsistencyLevel) =
     throw new UnsupportedOperationException

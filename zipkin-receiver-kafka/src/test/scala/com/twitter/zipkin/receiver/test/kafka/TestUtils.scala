@@ -45,6 +45,8 @@ object TestUtils {
     f
   }
 
+
+
   def startKafkaServer() = {
     val logDir = tempDir()
     val props = new Properties() {

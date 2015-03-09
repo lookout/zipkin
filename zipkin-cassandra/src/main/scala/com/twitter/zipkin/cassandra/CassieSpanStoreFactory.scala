@@ -119,12 +119,16 @@ trait CassieSpanStoreFactory { self: App =>
   val cassieMaxTraceCols = flag("zipkin.store.cassie.maxTraceCols", Defaults.MaxTraceCols, "max number of spans to return from a query")
   val cassieReadBatchSize = flag("zipkin.store.cassie.readBatchSize", Defaults.ReadBatchSize, "max number of rows per query")
 
+  val cassieUsername = flag("zipkin.store.cassie.username", "", "cassandra zipkin keyspace username")
+  val cassiePassword = flag("zipkin.store.cassie.password", "", "cassandra zipkin keyspace password")
+
   def newCassandraStore(stats: StatsReceiver = DefaultStatsReceiver.scope("cassie")): CassieSpanStore = {
     val scopedStats = stats.scope(cassieKeyspace())
     val Name.Bound(addr) = Resolver.eval(cassieDest())
     val cluster = new VarAddrCluster(addr)
     //TODO: properly tune these
-    val keyspace = KeyspaceBuilder(cluster, cassieKeyspace(), scopedStats, { () => DefaultTracer })
+
+    val keyspace = KeyspaceBuilder(cluster, cassieKeyspace(), scopedStats, { () => DefaultTracer }, username = cassieUsername(), password = cassiePassword())
 
     new CassieSpanStore(
       keyspace.connect(),

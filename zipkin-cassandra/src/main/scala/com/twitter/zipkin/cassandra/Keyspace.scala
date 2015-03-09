@@ -29,12 +29,14 @@ object Keyspace {
     hosts: Seq[(String, Int)],
     path: String,
     timeout: Duration,
+    username: String = "zipkin",
+    password: String = "",
     stats: StatsReceiver = NullStatsReceiver): KeyspaceBuilder = {
 
     val sockets = hosts map { case (h, p) => new InetSocketAddress(h, p) }
     useDefaults {
       new ServerSetsCluster(sockets, path, timeout.inMillis.toInt, stats)
-        .keyspace(keyspaceName)
+        .keyspace(keyspaceName, username, password)
     }
   }
 
@@ -42,13 +44,15 @@ object Keyspace {
     keyspaceName: String = "Zipkin",
     nodes: Set[String] = Set("localhost"),
     port: Int = 9160,
+    username: String = "zipkin",
+    password: String = "",
     stats: StatsReceiver = NullStatsReceiver,
     tracerFactory: Tracer.Factory = NullTracer.factory): KeyspaceBuilder = {
 
     useDefaults {
       new Cluster(nodes, port, stats, tracerFactory)
-        .keyspace(keyspaceName)
-    }
+        .keyspace(keyspaceName, username, password)
+    }.username(username).password(password)
   }
 
   def useDefaults(keyspaceBuilder: KeyspaceBuilder): KeyspaceBuilder = {
