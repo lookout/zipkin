@@ -47,11 +47,15 @@ private class ClusterRemapper(
   remapPeriod: Duration,
   port: Int = 9160,
   statsReceiver: StatsReceiver,
-  tracerFactory: Tracer.Factory
+  tracerFactory: Tracer.Factory,
+  username: String,
+  password: String
 ) extends CCluster[SocketAddress] {
   import ClusterRemapper._
 
   private[this] var hosts = seeds
+  private[this] var user = username
+  private[this] var pass = password
   private[this] var changes = new Promise[Spool[FCluster.Change[SocketAddress]]]
 
   // Timer keeps updating the host list. Variables "hosts" and "changes" together reflect the cluster consistently
@@ -101,7 +105,10 @@ private class ClusterRemapper(
       hostConnectionMaxWaiters = 100,
       statsReceiver = statsReceiver,
       tracerFactory = tracerFactory,
-      retryPolicy = RetryPolicy.Idempotent
+      retryPolicy = RetryPolicy.Idempotent,
+      true,
+      user,
+      pass
     )
     ccp map {
       log.info("Mapping cluster...")

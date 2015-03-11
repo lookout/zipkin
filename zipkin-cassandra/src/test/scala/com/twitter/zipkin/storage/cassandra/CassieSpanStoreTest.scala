@@ -29,15 +29,38 @@ class CassieSpanStoreTest extends FunSuite {
   FakeServer.start()
 
   object CassieStore extends App with CassieSpanStoreFactory
-  CassieStore.main(Array("-zipkin.store.cassie.dest", "127.0.0.1:%d".format(FakeServer.port.get)))
+  CassieStore.main(Array("-zipkin.store.cassie.dest",
+                         "127.0.0.1:%d".format(FakeServer.port.get),
+                         "-zipkin.store.cassie.username",
+                         FakeCassandra.username,
+                         "-zipkin.store.cassie.password",
+                         FakeCassandra.password
+                         ))
 
   def newSpanStore = {
     FakeServer.reset()
     CassieStore.newCassandraStore()
   }
 
+  // Gets non-visible class variables
+  def get_privates[T](obj: T, fieldname: String) = {
+    val field = obj.getClass.getDeclaredField(fieldname)
+    field.setAccessible(true)
+    field.get(obj)
+  }
+
+  test("user name and password are set") {
+    val cassStore = CassieStore.newCassandraStore()
+    val keyspace = get_privates(cassStore, "com$twitter$zipkin$storage$cassandra$CassieSpanStore$$keyspace")
+    val provider = get_privates(keyspace, "provider")
+    val user     = get_privates(provider, "username")
+    val pass     = get_privates(provider, "password")
+    assert(user == FakeCassandra.username)
+    assert(pass == FakeCassandra.password)
+  }
+
   test("validate") {
-    // FakeCassandra doesn't honor sort order
-    new SpanStoreValidator(newSpanStore, true).validate
+     // FakeCassandra doesn't honor sort order
+     new SpanStoreValidator(newSpanStore, true).validate
   }
 }

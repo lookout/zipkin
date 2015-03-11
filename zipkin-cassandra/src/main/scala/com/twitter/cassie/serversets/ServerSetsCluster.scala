@@ -84,9 +84,9 @@ class ServerSetsCluster(serverSet: ServerSet, stats: StatsReceiver, tracer: Trac
    * Returns a  [[com.twitter.cassie.KeyspaceBuilder]] instance.
    * @param name the keyspace's name
    */
-  def keyspace(name: String): KeyspaceBuilder = {
+  def keyspace(name: String, username: String, password: String): KeyspaceBuilder = {
     serverSet.monitor(new NoOpMonitor()) // will block until serverset ready
     val cluster = new ZookeeperServerSetCCluster(serverSet)
-    KeyspaceBuilder(cluster, name, stats.scope("cassie").scope(name), tracer)
+    KeyspaceBuilder(cluster, name, stats.scope("cassie").scope(name), tracer, username = username, password = password)
   }
 }

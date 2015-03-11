@@ -27,6 +27,9 @@ import java.util.concurrent.TimeUnit
 import org.apache.cassandra.finagle.thrift.Cassandra.ServiceToClient
 import org.apache.cassandra.finagle.thrift.{ UnavailableException, TimedOutException }
 import org.apache.thrift.protocol.{ TBinaryProtocol, TProtocolFactory }
+import collection.mutable._
+import collection.JavaConversions._
+import org.apache.cassandra.finagle.thrift.AuthenticationRequest
 
 sealed trait RetryPolicy
 
@@ -48,7 +51,9 @@ private[cassie] class ClusterClientProvider(
   val statsReceiver: StatsReceiver,
   val tracerFactory: Tracer.Factory,
   val retryPolicy: RetryPolicy = RetryPolicy.Idempotent,
-  val failFast: Boolean = true
+  val failFast: Boolean = true,
+  val username: String,
+  val password: String
 ) extends ClientProvider {
 
   implicit val fakeTimer = new Timer {
@@ -133,6 +138,10 @@ private[cassie] class ClusterClientProvider(
     override def prepareConnFactory(factory: ServiceFactory[ThriftClientRequest, Array[Byte]]) = {
       val keyspacedSetFactory = factory flatMap { service =>
         val client = new ServiceToClient(service, new TBinaryProtocol.Factory())
+        // call login
+        val loginMap: java.util.Map[String, String] = HashMap("username" -> username, "password" -> password)
+        val authRequest = new AuthenticationRequest(loginMap)
+        client.login(authRequest)
         client.set_keyspace(keyspace) map { _ => service }
       }
       // set up tracing

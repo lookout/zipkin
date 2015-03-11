@@ -48,7 +48,7 @@ class CassandraStorageTest extends FunSuite with BeforeAndAfter {
 
   before {
     FakeServer.start()
-    val keyspaceBuilder = Keyspace.static(port = FakeServer.port.get)
+    val keyspaceBuilder = Keyspace.static(port = FakeServer.port.get, username = FakeCassandra.username, password = FakeCassandra.password)
     val builder = StorageBuilder(keyspaceBuilder)
     cassandraStorage = builder.apply()
   }
@@ -56,6 +56,14 @@ class CassandraStorageTest extends FunSuite with BeforeAndAfter {
   after {
     cassandraStorage.close()
     FakeServer.stop()
+  }
+
+  test("has username and password") {
+    val user = "foo"
+    val pass = "bar"
+    val keyspaceBuilder = Keyspace.static(port = FakeServer.port.get, username=user, password=pass)
+    assert(keyspaceBuilder.username == user)
+    assert(keyspaceBuilder.password == pass)
   }
 
   test("getSpansByTraceId") {

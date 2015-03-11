@@ -78,7 +78,7 @@ class CassandraAggregatesTest extends FunSuite with MockitoSugar with BeforeAndA
 
   before {
     FakeServer.start()
-    val keyspaceBuilder = Keyspace.static(port = FakeServer.port.get)
+    val keyspaceBuilder = Keyspace.static(port = FakeServer.port.get, username = FakeCassandra.username, password = FakeCassandra.password)
     val builder = AggregatesBuilder(keyspaceBuilder)
     agg = builder.apply()
   }

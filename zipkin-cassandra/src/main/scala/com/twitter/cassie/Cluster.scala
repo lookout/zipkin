@@ -59,12 +59,12 @@ class Cluster(seedHosts: Set[String], seedPort: Int, stats: StatsReceiver, trace
    * Returns a  [[com.twitter.cassie.KeyspaceBuilder]] instance.
    * @param name the keyspace's name
    */
-  def keyspace(name: String): KeyspaceBuilder = {
+  def keyspace(name: String, username: String, password: String): KeyspaceBuilder = {
     val scopedStats = stats.scope("cassie").scope(name)
     val seedAddresses = seedHosts.map { host => new InetSocketAddress(host, seedPort) }.toSeq
     val cluster = if (mapHostsEvery > 0.seconds)
       // either map the cluster for this keyspace
-      new ClusterRemapper(name, seedAddresses, mapHostsEvery, seedPort, stats.scope("remapper"), tracer)
+      new ClusterRemapper(name, seedAddresses, mapHostsEvery, seedPort, stats.scope("remapper"), tracer, username, password)
     else
       // or connect directly to the hosts that were given as seeds
       new SocketAddressCluster(seedAddresses)
@@ -87,7 +87,7 @@ trait ClusterBase {
    * Returns a  [[com.twitter.cassie.KeyspaceBuilder]] instance.
    * @param name the keyspace's name
    */
-  def keyspace(name: String): KeyspaceBuilder
+  def keyspace(name: String, username: String, password: String): KeyspaceBuilder
 }
 
 object KeyspaceBuilder {
@@ -108,7 +108,9 @@ case class KeyspaceBuilder(
   _maxConnectionsPerHost: Int = 5,
   _hostConnectionMaxWaiters: Int = 100,
   _retryPolicy: RetryPolicy = RetryPolicy.Idempotent,
-  _failFast: Boolean = false
+  _failFast: Boolean = false,
+  username: String = "",
+  password: String = ""
 ) {
 
   import KeyspaceBuilder._
@@ -137,7 +139,9 @@ case class KeyspaceBuilder(
       stats,
       tracer,
       _retryPolicy,
-      _failFast)
+      _failFast,
+      username,
+      password)
     new Keyspace(name, ccp, stats)
   }
 
@@ -173,4 +177,7 @@ case class KeyspaceBuilder(
   def tracerFactory(t: Tracer.Factory): KeyspaceBuilder = copy(tracer = t)
 
   def hostConnectionMaxWaiters(i: Int): KeyspaceBuilder = copy(_hostConnectionMaxWaiters = i)
+
+  def username(user: String): KeyspaceBuilder = copy(username = user)
+  def password(pass: String): KeyspaceBuilder = copy(password = pass)
 }

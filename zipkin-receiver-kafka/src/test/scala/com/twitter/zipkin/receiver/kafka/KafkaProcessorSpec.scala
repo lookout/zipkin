@@ -28,6 +28,7 @@ import com.twitter.zipkin.zookeeper.ZooKeeperClientFactory
 import java.util.Properties
 import com.twitter.app.{App, Flaggable}
 import com.twitter.zipkin.thriftscala
+import com.twitter.zipkin.storage.util.Retry
 
 @RunWith(classOf[JUnitRunner])
 class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
@@ -65,7 +66,7 @@ class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
   before {
     zkServer = TestUtils.startZkServer()
     Thread.sleep(500)
-    testKafkaServer = TestUtils.startKafkaServer()
+    Retry(10) { testKafkaServer = TestUtils.startKafkaServer() }
     Thread.sleep(500)
   }
 
