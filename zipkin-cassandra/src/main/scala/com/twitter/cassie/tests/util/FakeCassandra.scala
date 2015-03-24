@@ -263,7 +263,7 @@ class FakeCassandra extends Cassandra.Iface {
       true
     }
     else{
-      throw new AuthorizationException
+      throw new AuthorizationException("[fake]bad user/pass")
     }
   }
 
