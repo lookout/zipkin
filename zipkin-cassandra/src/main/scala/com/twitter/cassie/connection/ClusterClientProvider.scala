@@ -141,7 +141,11 @@ private[cassie] class ClusterClientProvider(
         // call login
         val loginMap: java.util.Map[String, String] = HashMap("username" -> username, "password" -> password)
         val authRequest = new AuthenticationRequest(loginMap)
-        client.login(authRequest)
+        val future = client.login(authRequest)
+        future onFailure { exception =>
+          throw exception
+        }
+
         client.set_keyspace(keyspace) map { _ => service }
       }
       // set up tracing
