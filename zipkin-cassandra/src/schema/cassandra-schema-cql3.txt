@@ -6,6 +6,7 @@ CREATE TABLE "Zipkin"."ServiceSpanNameIndex" (
     value blob,
     PRIMARY KEY (key, column1)
 ) WITH CLUSTERING ORDER BY (column1 ASC)
+    AND COMPACT STORAGE
     AND compaction = {'min_threshold': '4', 'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32'};
 
 CREATE TABLE "Zipkin"."TopAnnotations" (
@@ -14,6 +15,7 @@ CREATE TABLE "Zipkin"."TopAnnotations" (
     value blob,
     PRIMARY KEY (key, column1)
 ) WITH CLUSTERING ORDER BY (column1 ASC)
+    AND COMPACT STORAGE
     AND compaction = {'min_threshold': '4', 'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32'};
 
 CREATE TABLE "Zipkin"."ServiceNameIndex" (
@@ -22,6 +24,7 @@ CREATE TABLE "Zipkin"."ServiceNameIndex" (
     value blob,
     PRIMARY KEY (key, column1)
 ) WITH CLUSTERING ORDER BY (column1 ASC)
+    AND COMPACT STORAGE
     AND compaction = {'min_threshold': '4', 'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32'};
 
 CREATE TABLE "Zipkin"."SpanNames" (
@@ -30,6 +33,7 @@ CREATE TABLE "Zipkin"."SpanNames" (
     value blob,
     PRIMARY KEY (key, column1)
 ) WITH CLUSTERING ORDER BY (column1 ASC)
+    AND COMPACT STORAGE
     AND compaction = {'min_threshold': '4', 'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32'};
 
 CREATE TABLE "Zipkin"."AnnotationsIndex" (
@@ -38,6 +42,7 @@ CREATE TABLE "Zipkin"."AnnotationsIndex" (
     value blob,
     PRIMARY KEY (key, column1)
 ) WITH CLUSTERING ORDER BY (column1 ASC)
+    AND COMPACT STORAGE
     AND compaction = {'min_threshold': '4', 'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32'};
 
 CREATE TABLE "Zipkin"."Dependencies" (
@@ -46,6 +51,7 @@ CREATE TABLE "Zipkin"."Dependencies" (
     value blob,
     PRIMARY KEY (key, column1)
 ) WITH CLUSTERING ORDER BY (column1 ASC)
+    AND COMPACT STORAGE
     AND compaction = {'min_threshold': '4', 'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32'};
 
 CREATE TABLE "Zipkin"."ServiceNames" (
@@ -54,6 +60,7 @@ CREATE TABLE "Zipkin"."ServiceNames" (
     value blob,
     PRIMARY KEY (key, column1)
 ) WITH CLUSTERING ORDER BY (column1 ASC)
+    AND COMPACT STORAGE
     AND compaction = {'min_threshold': '4', 'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32'};
 
 CREATE TABLE "Zipkin"."DurationIndex" (
@@ -62,6 +69,7 @@ CREATE TABLE "Zipkin"."DurationIndex" (
     value blob,
     PRIMARY KEY (key, column1)
 ) WITH CLUSTERING ORDER BY (column1 ASC)
+    AND COMPACT STORAGE
     AND compaction = {'min_threshold': '4', 'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32'};
 
 CREATE TABLE "Zipkin"."Traces" (
@@ -70,4 +78,5 @@ CREATE TABLE "Zipkin"."Traces" (
     value blob,
     PRIMARY KEY (key, column1)
 ) WITH CLUSTERING ORDER BY (column1 ASC)
+    AND COMPACT STORAGE
     AND compaction = {'min_threshold': '4', 'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32'};
