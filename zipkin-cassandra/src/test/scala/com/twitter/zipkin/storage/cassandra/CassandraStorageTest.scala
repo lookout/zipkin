@@ -66,6 +66,15 @@ class CassandraStorageTest extends FunSuite with BeforeAndAfter {
     assert(keyspaceBuilder.password == pass)
   }
 
+  test("raises authorization exception") {
+    val keyspaceBuilder = Keyspace.static(port = FakeServer.port.get, username = "bad", password = "creds")
+    val builder = StorageBuilder(keyspaceBuilder)
+    cassandraStorage = builder.apply()
+    intercept[org.apache.cassandra.finagle.thrift.AuthorizationException] {
+      Await.result(cassandraStorage.storeSpan(span1))
+    }
+  }
+
   test("getSpansByTraceId") {
     Await.result(cassandraStorage.storeSpan(span1))
     val spans = Await.result(cassandraStorage.getSpansByTraceId(span1.traceId))

@@ -30,6 +30,7 @@ import org.apache.thrift.protocol.{ TBinaryProtocol, TProtocolFactory }
 import collection.mutable._
 import collection.JavaConversions._
 import org.apache.cassandra.finagle.thrift.AuthenticationRequest
+import com.twitter.logging.Logger
 
 sealed trait RetryPolicy
 
@@ -55,6 +56,8 @@ private[cassie] class ClusterClientProvider(
   val username: String,
   val password: String
 ) extends ClientProvider {
+
+  var log = Logger.get(getClass.getName)
 
   implicit val fakeTimer = new Timer {
     def schedule(when: Time)(f: => Unit): TimerTask = throw new Exception("illegal use!")
@@ -141,8 +144,12 @@ private[cassie] class ClusterClientProvider(
         // call login
         val loginMap: java.util.Map[String, String] = HashMap("username" -> username, "password" -> password)
         val authRequest = new AuthenticationRequest(loginMap)
-        client.login(authRequest)
-        client.set_keyspace(keyspace) map { _ => service }
+        val login = client.login(authRequest)
+        val ks = client.set_keyspace(keyspace)
+        for {
+          _ <- login.onFailure( e => log.error(e.toString) )
+          _ <- ks.onFailure( e => log.error(e.toString) )
+        } yield service
       }
       // set up tracing
       super.prepareConnFactory(keyspacedSetFactory)
