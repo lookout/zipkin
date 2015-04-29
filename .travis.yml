@@ -1,19 +1,16 @@
 language: scala
-
 scala:
-  - 2.10.4
-
+- 2.10.4
 services:
-  - redis-server
-
+- redis-server
 jdk:
-  - oraclejdk7
-  - openjdk6
-  - openjdk7
-
+- oraclejdk7
+- openjdk6
+- openjdk7
 before_script:
-  # default $SBT_OPTS is irrelevant to sbt lancher
-  - unset SBT_OPTS
-
+- unset SBT_OPTS
 script:
-  - "./bin/sbt ++$TRAVIS_SCALA_VERSION clean test"
+- "./bin/sbt ++$TRAVIS_SCALA_VERSION clean test"
+deploy:
+  api_key:
+    secure: NlAfnRn2v6aVQfVMWc/8+hkZ+fRvex7c4F6V0MNDu1In8KYkpE/HIqRarHM34PWDqxlizuRIB2RdikfAN8oNetfC4d+ip8oMkkxioD4pRFvR7MAs2D/hbMOqLgUJuPLtk+w4MpkqHUz+3Ov3FsBEPLrGAvDKZA+6nln6AriNkck=
