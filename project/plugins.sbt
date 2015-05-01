@@ -14,3 +14,12 @@ libraryDependencies ++= Seq(
 addSbtPlugin("com.twitter" %% "scrooge-sbt-plugin" % "3.16.3")
 
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.9.2")
+
+resolvers += Resolver.url(
+"bintray-sbt-plugin-releases",
+url("http://dl.bintray.com/content/sbt/sbt-plugin-releases"))(
+Resolver.ivyStylePatterns)
+
+addSbtPlugin("me.lessis" % "bintray-sbt" % "0.1.1")
+
+resolvers += Classpaths.sbtPluginReleases

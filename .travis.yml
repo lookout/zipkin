@@ -10,7 +10,17 @@ jdk:
 before_script:
 - unset SBT_OPTS
 script:
-- "./bin/sbt ++$TRAVIS_SCALA_VERSION clean test"
+- ./bin/sbt ++$TRAVIS_SCALA_VERSION clean test
 deploy:
   api_key:
     secure: NlAfnRn2v6aVQfVMWc/8+hkZ+fRvex7c4F6V0MNDu1In8KYkpE/HIqRarHM34PWDqxlizuRIB2RdikfAN8oNetfC4d+ip8oMkkxioD4pRFvR7MAs2D/hbMOqLgUJuPLtk+w4MpkqHUz+3Ov3FsBEPLrGAvDKZA+6nln6AriNkck=
+env:
+  global:
+  - secure: ZSgC7lHTXJqM47zwJZQQWRo4iQaKh0GwTSTxEXalOqmJwSFoNvCvQwS732L20aVDtxWTyZC1OpPCtT5dfUjplz3AZ/dfLMtuRMQt/90yDmJq3edVzJ+pq2aSu6JY/GhL+zHVdPwxMc31NkEjAbPAZ/Eq/57sjAS3gg+v+/spAFI=
+  - secure: P1xgdCO4GDFieC5FV13iNLIE/m4zOY/SS8hBuepsaNe81obeufBkT+0RnCLMIHIms8TeRlORWdwQjwAiVp6+2gFZCroYC8xQ9K7UfIbTlAcycGtPcTDlPMmgyGJ5MQ7DUw4VooaVUVcvAccaeH1VEkybhwLL6QlPe2VeKo5GBC8=
+after_success:
+  - >
+      test "${TRAVIS_PULL_REQUEST}" = 'false' &&
+      test "${TRAVIS_JDK_VERSION}" = 'oraclejdk7' &&
+      sh "$TRAVIS_BUILD_DIR/.travis.credentials.sh" &&
+      sbt 'set version := version.value + "." + System.getenv("TRAVIS_BUILD_NUMBER")' publish
