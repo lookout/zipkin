@@ -48,7 +48,7 @@ Noticed a bug? [https://github.com/twitter/zipkin/issues](https://github.com/twi
 ## Contributing
 See [CONTRIBUTING.md](https://github.com/twitter/zipkin/blob/master/CONTRIBUTING.md) for guidelines.
 
-Areas where we'd love to see contributions: 
+Areas where we'd love to see contributions:
 
 * adding tracing to more libraries and protocols
 * interesting reports generated with Hadoop from the trace data
@@ -57,6 +57,9 @@ Areas where we'd love to see contributions:
 
 ## Versioning
 We use [SemVer](http://semver.org/) style versioning.
+
+## Artifacts
+Artifacts built here are released to [Bintray](https://bintray.com/lookout/zipkin)
 
 ## License
 Copyright 2012 Twitter, Inc.
