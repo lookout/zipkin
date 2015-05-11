@@ -36,7 +36,7 @@ Gem::Specification.new do |s|
   s.add_dependency "rack"
 
   if RUBY_PLATFORM == "java"
-    s.add_dependency 'hermann', "~> 0.20.1"
+    s.add_dependency 'hermann', "~> 0.23"
     s.platform = 'java'
   end
 
