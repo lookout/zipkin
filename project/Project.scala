@@ -23,7 +23,7 @@ import sbtassembly.Plugin._
 import AssemblyKeys._
 
 object Zipkin extends Build {
-  val zipkinVersion = "1.2.0-SNAPSHOT"
+  val zipkinVersion = "1.2.01"
 
   val finagleVersion = "6.22.0"
   val utilVersion = "6.22.1"
@@ -78,8 +78,7 @@ object Zipkin extends Build {
     scalaVersion := "2.10.4",
     crossPaths := false,            /* Removes Scala version from artifact name */
     fork := true, // forking prevents runaway thread pollution of sbt
-    baseDirectory in run := file(cwd), // necessary for forking
-    publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath + "/.ivy2/local")))
+    baseDirectory in run := file(cwd) // necessary for forking
   )
 
   // settings from inlined plugins
@@ -120,7 +119,8 @@ object Zipkin extends Build {
   lazy val zipkin =
     Project(
       id = "zipkin",
-      base = file(".")
+      base = file("."),
+      settings = Seq(publish := {})
     ) aggregate(
       tracegen, common, scrooge, zookeeper,
       query, queryCore, queryService, web,
