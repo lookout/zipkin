@@ -22,8 +22,11 @@ import Keys._
 import sbtassembly.Plugin._
 import AssemblyKeys._
 
+
 object Zipkin extends Build {
-  val zipkinVersion = "1.2.01"
+  import bintray.BintrayKeys._
+
+  val zipkinVersion = "1.2.02"
 
   val finagleVersion = "6.22.0"
   val utilVersion = "6.22.1"
@@ -76,6 +79,8 @@ object Zipkin extends Build {
     version := zipkinVersion,
     crossScalaVersions := Seq("2.10.4"),
     scalaVersion := "2.10.4",
+    bintrayOrganization := Some("lookout"),
+    bintrayRepository := "zipkin",
     crossPaths := false,            /* Removes Scala version from artifact name */
     fork := true, // forking prevents runaway thread pollution of sbt
     baseDirectory in run := file(cwd) // necessary for forking
@@ -121,7 +126,7 @@ object Zipkin extends Build {
       id = "zipkin",
       base = file("."),
       settings = Seq(publish := {})
-    ) aggregate(
+    ).aggregate(
       tracegen, common, scrooge, zookeeper,
       query, queryCore, queryService, web,
       collectorScribe, collectorCore, collectorService,
