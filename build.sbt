@@ -1,6 +1,3 @@
-import bintray.AttrMap
-import bintray._
-
 name := "zipkin"
 
 organization := "com.twitter"
@@ -9,16 +6,12 @@ scalaVersion := "2.9.3"
 
 publishMavenStyle := false
 
-seq(bintraySettings:_*)
-
-bintrayPublishSettings
-
-version := "1.2.0"
-
-bintray.Keys.repository in bintray.Keys.bintray := "sbt-plugins"
+version := "1.2.01"
 
 licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
 
-bintray.Keys.repository in bintray.Keys.bintray := "zipkin"
+// bintray values below only affect the top level aggregator project, check Project.scala for default settings per sub project
 
-bintray.Keys.bintrayOrganization in bintray.Keys.bintray := Some("lookout")
+bintrayOrganization := Some("lookout")
+
+bintrayRepository := "zipkin"
