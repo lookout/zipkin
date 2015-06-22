@@ -31,12 +31,12 @@ Gem::Specification.new do |s|
   s.files                     = Dir.glob("{bin,lib}/**/*")
   s.require_path              = 'lib'
 
-  s.add_dependency "finagle-thrift", "~> 1.3.0"
+  s.add_dependency "finagle-thrift", "~> 1.4"
   s.add_dependency "scribe", "~> 0.2.4"
   s.add_dependency "rack"
 
   if RUBY_PLATFORM == "java"
-    s.add_dependency 'hermann', "~> 0.23"
+    s.add_dependency 'hermann', "~> 0.24"
     s.platform = 'java'
   end
 
