@@ -45,7 +45,9 @@ object TestUtils {
     f
   }
 
-
+  def closePorts() = {
+    ports.map( port => new ServerSocket(port).close() )
+  }
 
   def startKafkaServer() = {
     val logDir = tempDir()
