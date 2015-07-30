@@ -35,11 +35,6 @@ Gem::Specification.new do |s|
   s.add_dependency "scribe", "~> 0.2.4"
   s.add_dependency "rack"
 
-  if RUBY_PLATFORM == "java"
-    s.add_dependency 'hermann', "~> 0.24"
-    s.platform = 'java'
-  end
-
   s.add_development_dependency "rspec", "~> 3.0.0"
   s.add_development_dependency "rack-test"
 end

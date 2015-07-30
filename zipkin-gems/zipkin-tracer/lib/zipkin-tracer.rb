@@ -17,7 +17,12 @@ require 'scribe'
 require 'zipkin-tracer/careless_scribe'
 
 if RUBY_PLATFORM == 'java'
-  require 'zipkin-tracer/zipkin_kafka_tracer'
+  begin
+    require 'hermann/producer'
+  rescue LoadError
+    # Hermann not available
+  end
+  require 'zipkin-tracer/zipkin_kafka_tracer' if defined?(Hermann)
 end
 
 module ZipkinTracer extend self
