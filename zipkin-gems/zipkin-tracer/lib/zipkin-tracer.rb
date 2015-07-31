@@ -44,7 +44,7 @@ module ZipkinTracer extend self
         careless_scribe = CarelessScribe.new(scribe)
         scribe_max_buffer = config[:scribe_max_buffer] ? config[:scribe_max_buffer] : 10
         ::Trace.tracer = ::Trace::ZipkinTracer.new(careless_scribe, scribe_max_buffer)
-      elsif config[:zookeeper] && RUBY_PLATFORM == 'java'
+      elsif config[:zookeeper] && RUBY_PLATFORM == 'java' && defined?(Hermann)
         kafkaTracer = ::Trace::ZipkinKafkaTracer.new
         kafkaTracer.connect(config[:zookeeper])
         ::Trace.tracer = kafkaTracer

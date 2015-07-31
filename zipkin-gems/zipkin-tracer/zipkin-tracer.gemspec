@@ -37,4 +37,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "rspec", "~> 3.0.0"
   s.add_development_dependency "rack-test"
+
+  # Hermann is an optional dependency. We had it here so we can run unit tests
+  s.add_development_dependency 'hermann', "~> 0.24"
 end
