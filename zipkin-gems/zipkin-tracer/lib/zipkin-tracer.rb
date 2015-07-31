@@ -13,11 +13,22 @@
 # limitations under the License.
 require 'finagle-thrift'
 require 'finagle-thrift/trace'
+
+begin
 require 'scribe'
+rescue LoadError
+  # Scribe is not installed
+end
+
 require 'zipkin-tracer/careless_scribe'
 
 if RUBY_PLATFORM == 'java'
-  require 'zipkin-tracer/zipkin_kafka_tracer'
+  begin
+    require 'hermann/producer'
+  rescue LoadError
+    # Hermann not available
+  end
+  require 'zipkin-tracer/zipkin_kafka_tracer' if defined?(::Hermann)
 end
 
 module ZipkinTracer extend self
@@ -34,12 +45,12 @@ module ZipkinTracer extend self
       @service_name = config[:service_name]
       @service_port = config[:service_port]
 
-      if config[:scribe_server]
+      if config[:scribe_server] && defined?(::Scribe)
         scribe = config[:scribe_server] ? Scribe.new(config[:scribe_server]) : Scribe.new()
         careless_scribe = CarelessScribe.new(scribe)
         scribe_max_buffer = config[:scribe_max_buffer] ? config[:scribe_max_buffer] : 10
         ::Trace.tracer = ::Trace::ZipkinTracer.new(careless_scribe, scribe_max_buffer)
-      elsif config[:zookeeper] && RUBY_PLATFORM == 'java'
+      elsif config[:zookeeper] && RUBY_PLATFORM == 'java' && defined?(::Hermann)
         kafkaTracer = ::Trace::ZipkinKafkaTracer.new
         kafkaTracer.connect(config[:zookeeper])
         ::Trace.tracer = kafkaTracer

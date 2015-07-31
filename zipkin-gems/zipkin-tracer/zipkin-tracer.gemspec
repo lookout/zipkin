@@ -32,14 +32,12 @@ Gem::Specification.new do |s|
   s.require_path              = 'lib'
 
   s.add_dependency "finagle-thrift", "~> 1.4"
-  s.add_dependency "scribe", "~> 0.2.4"
   s.add_dependency "rack"
-
-  if RUBY_PLATFORM == "java"
-    s.add_dependency 'hermann', "~> 0.24"
-    s.platform = 'java'
-  end
 
   s.add_development_dependency "rspec", "~> 3.0.0"
   s.add_development_dependency "rack-test"
+
+  # Hermann & Scribe are optional dependencies. We add them here so we can run unit tests
+  s.add_development_dependency 'hermann', "~> 0.24"
+  s.add_development_dependency "scribe", "~> 0.2.4"
 end

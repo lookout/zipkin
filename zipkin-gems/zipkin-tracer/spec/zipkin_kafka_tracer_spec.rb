@@ -50,17 +50,17 @@ if RUBY_PLATFORM == 'java'
     end
 
     describe '#record' do
-      module Trace
-        class BinaryAnnotation
+      module MockTrace
+        class BinaryAnnotation < Trace::BinaryAnnotation
           def initialize;end
         end
-        class Annotation
+        class Annotation < Trace::Annotation
           def initialize;end
         end
       end
 
-      let(:binary_annotation) { ::Trace::BinaryAnnotation.new }
-      let(:annotation)        { ::Trace::Annotation.new }
+      let(:binary_annotation) { MockTrace::BinaryAnnotation.new }
+      let(:annotation)        { MockTrace::Annotation.new }
 
       it 'returns if id already sampled' do
         allow(id).to receive(:sampled?) { false }
