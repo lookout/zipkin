@@ -73,6 +73,7 @@ class KafkaProcessorSpecSimple extends FunSuite with BeforeAndAfter {
   after {
     testKafkaServer.shutdown
     zkServer.shutdown
+    TestUtils.closePorts()
   }
 
   test("kafka processor test") {
